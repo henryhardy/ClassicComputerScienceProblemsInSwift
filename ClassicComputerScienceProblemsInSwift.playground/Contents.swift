@@ -142,6 +142,77 @@ func randomOTPKey(length: Int) -> OTPKey {
 //1.3.2 Encrypting and Decrypting
 //XOR is a logical bitwise (operates at the bit level) operation that returns true when either operands are true, but not when both or neither are true
 
-func enryptOTP
+func encryptOTP(original: String) -> OTPKeyPair {
+    let dummy = randomOTPKey(length: original.utf8.count)
+    let encrypted: OTPKey = dummy.enumerated().map { i, e in
+        return e ^ original.utf8[original.utf8.index(original.utf8.startIndex, offsetBy: i)] // in swift the XOR operation is ^
+    }
+    return (dummy, encrypted)
+}
+
+//enumerated is used before map so that we can get the index along with each e element that is being mapped. We need the index to pull specific bytes from the original String that corresponds to the bytes in the dummy data. We use startIndex and offsetBy instead of raw integers because the index type must match the expected type of the subscript
+
+func decryptOTP(keyPair: OTPKeyPair) -> String? {
+    let decrypted: OTPKey = keyPair.key1.enumerated().map { i, e in
+        e ^ keyPair.key2[i]
+    }
+    return String(bytes: decrypted, encoding: String.Encoding.utf8)
+}
+
+decryptOTP(keyPair: encryptOTP(original: "herp-derp-malerp"))
+
+
+//1.4 Calculating Pi
+//pi = 4/1 - 4/3 + 4/5 - 4/7 + 4/9 - denoninator counts up by odd numbers, alternating + and -
+
+func calculatePi(nTerms: UInt) -> Double {
+    let numerator: Double = 4
+    var denominator: Double = 1
+    var operation: Double = -1
+    var pi: Double = 0
+    for _ in 0..<nTerms {
+        pi += operation * (numerator / denominator)
+        denominator += 2
+        operation *= -1
+    }
+    return abs(pi) //abs = absolute value, always positive
+}
+
+//1.5 Towers of Hanoi (that game in the tomb on the evil planet in KOTOR where you had to shift the power around to pull down a force field so you could get some bad guy items.
+
+//ie, 3 sticks, 3 disks on left stick, from largest to smallest at bottom. Goal is to move to the right stick in the same order, only one at a time can be moved.
+
+// 1.5.1 Modelling the towers
+
+public class Stack<T>: CustomStringConvertible {
+    private var container: [T] = [T]()
+    public func push(_ thing: T) { container.append(thing)}
+    public func pop () -> T { return container.removeLast() }
+    public var description: String {return container.description}
+}
+
+var numDiscs = 3
+var towerA = Stack<Int>()
+var towerB = Stack<Int>()
+var towerC = Stack<Int>()
+for i in 1...numDiscs {
+    towerA.push(i)
+}
+
+//1.5.2 Solving the towers of hanoi
+func hanoi(from: Stack<Int>, to: Stack<Int>, temp: Stack<Int>, n: Int) {
+    if n == 1 { //base case
+        to.push(from.pop()) // move one disk
+    } else { //recursive case
+        hanoi(from: from, to: temp, temp: to, n: n-1)
+        hanoi(from: from, to: to, temp: temp, n: 1)
+        hanoi(from: temp, to: to, temp: from, n: n-1)
+    }
+}
+
+hanoi(from: towerA, to: towerC, temp: towerB, n: numDiscs)
+print(towerA)
+print(towerB)
+print(towerC)
 
 
